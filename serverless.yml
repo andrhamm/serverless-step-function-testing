@@ -1,0 +1,73 @@
+service:
+  name: serverless-step-function-testing
+
+frameworkVersion: '>=1.44.1 <2.0.0'
+
+plugins:
+  - serverless-pseudo-parameters
+  - serverless-step-functions
+
+custom:
+  arn_prefix_lambda_function: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service.name}-${self:provider.stage}
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  stage: ${opt:stage, 'stage'}
+  profile: ${opt:profile}
+  region: us-east-1
+  environment:
+    # NOTE: this is useful for local invocations and has no affect in deployed environments
+    AWS_PROFILE: ${self:provider.profile}
+
+package:
+  individually: true
+  exclude:
+    - config.*.yaml
+
+functions:
+    random:
+      handler: handlers.random
+    fifty:
+      handler: handlers.fifty
+
+stepFunctions:
+  stateMachines:
+    dualChoiceComparisonStepFunction:
+      name: dualChoiceComparison
+      definition:
+        StartAt: Parallel
+        States:
+          Parallel:
+            Type: Parallel
+            Next: Split
+            ResultPath: $.results
+            Branches:
+              - StartAt: Random
+                States:
+                  Random:
+                    Type: Task
+                    Resource: ${self:custom.arn_prefix_lambda_function}-random
+                    End: true
+              - StartAt: Fifty
+                States:
+                  Fifty:
+                    Type: Task
+                    Resource: ${self:custom.arn_prefix_lambda_function}-fifty
+                    End: true
+          LessThanFifty:
+            Type: Succeed
+          MoreThanFifty:
+            Type: Succeed
+          ExactlyFifty:
+            Type: Succeed
+          Split:
+            Type: Choice
+            Default: ExactlyFifty
+            Choices:
+              - Variable: "$.results[0].random"
+                NumericLessThan: "$.results[1].fifty"
+                Next: LessThanFifty
+              - Variable: "$.results[0].random"
+                NumericGreaterThan: "$.results[1].fifty"
+                Next: MoreThanFifty

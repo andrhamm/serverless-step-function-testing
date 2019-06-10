@@ -1,0 +1,26 @@
+{
+  "name": "serverless-step-function-testing",
+  "version": "1.0.0",
+  "description": "Demo for testing step functions with serverless",
+  "main": "handlers.js",
+  "scripts": {},
+  "author": "Andrew Hammond",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.470.0",
+    "source-map-support": "^0.5.6"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-source-map-support": "^2.0.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^4.19.1",
+    "serverless": "^1.44.1",
+    "serverless-pseudo-parameters": "^2.4.0",
+    "serverless-step-functions": "^1.23.0"
+  },
+  "private": true
+}
